@@ -178,3 +178,22 @@ class RNN:
         parameters = self.update_parameters(parameters, gradients, learning_rate)
 
         return loss, gradients, a[len(X) - 1]
+
+    def initialize_parameters(n_a, n_x, n_y):
+        """
+        Initialize parameters
+        """
+
+        Wax = np.random.randn(n_a, n_x) * 0.01
+        Waa = np.random.randn(n_a, n_a) * 0.01
+        Wya = np.random.randn(n_y, n_a) * 0.01
+        ba = np.zeros((n_a, 1))
+        by = np.zeros((n_y, 1))
+
+        parameters = {'Wax' : Wax,
+                      'Waa' : Waa,
+                      'Wya' : Wya,
+                      'ba'  : ba,
+                      'by'  : by}
+
+        return parameters
