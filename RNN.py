@@ -148,3 +148,11 @@ class RNN:
         gradients = {'dx': dx, 'da0': da0, 'dWax': dWax, 'dWaa': dWaa, 'dba': dba}
 
         return gradients
+
+    def update_parameters(parameters, gradients, lr):
+        parameters['Wax'] += -lr * gradients['dWax']
+        parameters['Waa'] += -lr * gradients['dWaa']
+        parameters['Wya'] += -lr * gradients['dWya']
+        parameters['ba'] += -lr * gradients['dba']
+        parameters['Wby'] += -lr * gradients['dby']
+        return parameters
