@@ -2,6 +2,12 @@ def softmax(a):
     e_a = np.exp(x - np.max(x))
     return e_a / e_a.sum(axis=0)
 
+def smooth_loss(loss, curr_loss):
+    return loss * 0.999 + curr_loss * 0.001
+
+def get_initial_loss(vocab_size, seq_length):
+    return -np.log(1.0 / vocab_size) * seq_length
+    
 def clip(gradients, max_val):
     dWaa = gradients['dWaa']
     dWax = gradients['dWax']
