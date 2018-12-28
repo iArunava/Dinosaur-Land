@@ -7,6 +7,10 @@ def smooth_loss(loss, curr_loss):
 
 def get_initial_loss(vocab_size, seq_length):
     return -np.log(1.0 / vocab_size) * seq_length
+
+def print_sample(sampled_indices, int2char):
+    dino = ''.join(int2char[idx] for idx in sampled_indices)
+    print (dino[0].upper() + dino[1:])
     
 def clip(gradients, max_val):
     dWaa = gradients['dWaa']
