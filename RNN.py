@@ -64,3 +64,38 @@ class RNN:
         cache = (a_next, a_prev, xt, parameters)
 
         return a_next, yt_pred, cache
+
+    def rnn_cell_backward(da_next, cache):
+        """
+        Implements the backward pass for a single RNN cell
+        """
+
+        # Retrieve the values from the cache
+        a_next, a_prev, xt, parameters = cache
+
+        # Retrieve values from parameters
+        Wax = parameters['Wax']
+        Waa = parameters['Waa']
+        Wya = parameters['Wya']
+        ba = parameters['ba']
+        by = parameters['by']
+
+        # Compute the gradient of tanh with respect to a_next
+        dtanh = (1 - a_next ** 2) * da_next
+
+        # Compute the gradient of the loss with respect to Wax
+        dxt = np.dot(Wax.T, dtanh)
+        dWax = np.dot(dtanh, xt.T)
+
+        # Compute the gradient with respect to Waa
+        da_prev = np.dot(Waa.T, dtanh)
+        dWaa = np.dot(dtanh, a_prev.T)
+
+        # Compute the gradients with respect to b
+        dba = np.sum(dtanh, axis=1, keepdims=True)
+
+        # Store the gradients
+        gradients = {'dxt' : dxt, 'da_prev' : da_prev,
+                     'dWax' : dWax, 'dWaa' : dWaa, 'dba' : dba}
+
+        return gradients
