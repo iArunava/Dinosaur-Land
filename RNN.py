@@ -2,7 +2,7 @@ import numpy
 from utils import *
 
 class RNN:
-    def rnn_forward(self, x, a0, parameters):
+    def rnn_forward(self, x, y, a0, parameters):
         """
         Implements the complete forward propagation in RNN
         """
@@ -26,7 +26,10 @@ class RNN:
             # Update the next hidden state
             # Get the prediction
             # And the cache for the forward pass
-            a_next, yt_pred, cache = rnn_cell_forward(x[:, :, t], a_next, parameters)
+            a_next, yt_pred, cache = self.rnn_cell_forward(x[:, :, t], a_next, parameters)
+
+            # Get the loss
+            loss -= np.log(yt_pred[y[t], 0])
 
             # Save the value of new a_next
             a[:, :, t] = a_next
@@ -40,7 +43,7 @@ class RNN:
         # Store values needed for backpropagation
         caches = (caches, x)
 
-        return a, y_pred, caches
+        return loss, caches, a, y_pred
 
     def rnn_cell_forward(self, xt, a_prev, parameters):
         """
@@ -65,7 +68,7 @@ class RNN:
 
         return a_next, yt_pred, cache
 
-    def rnn_cell_backward(da_next, cache):
+    def rnn_cell_backward(self, da_next, cache):
         """
         Implements the backward pass for a single RNN cell
         """
@@ -100,7 +103,7 @@ class RNN:
 
         return gradients
 
-    def rnn_backward(da, caches):
+    def rnn_backward(self, da, caches):
         """
         Implement the backward pass for a RNN over an entire sequence of input data
         """
@@ -124,7 +127,7 @@ class RNN:
         # Loop through the timesteps reversed
         for t in reversed(range(T_x)):
             # Compute the gradients at the time step t
-            gradients = rnn_cell_backward(da[:, :, t] + da_prevt, caches[t])
+            gradients = self.rnn_cell_backward(da[:, :, t] + da_prevt, caches[t])
 
             # Retrieve derivatives from gradients
             dxt, = gradients['dxt']
@@ -149,10 +152,29 @@ class RNN:
 
         return gradients
 
-    def update_parameters(parameters, gradients, lr):
+    def update_parameters(self, parameters, gradients, lr):
         parameters['Wax'] += -lr * gradients['dWax']
         parameters['Waa'] += -lr * gradients['dWaa']
         parameters['Wya'] += -lr * gradients['dWya']
         parameters['ba'] += -lr * gradients['dba']
         parameters['Wby'] += -lr * gradients['dby']
         return parameters
+
+    def optimize(self, X, Y, a_prev, parameters, learning_rate=0.01):
+        """
+        Execute one step of the optimization to train the model
+        """
+
+        # Forward propagate
+        loss, cache, _, _ = self.rnn_forward(X, Y, a_prev, parameters)
+
+        # Backpropagate through time
+        gradients, a = self.rnn_backward(X, Y, parameters, cache)
+
+        # Clip gradients
+        gradients = clip(gradients, 5)
+
+        # Update parameters
+        parameters = self.update_parameters(parameters, gradients, learning_rate)
+
+        return loss, gradients, a[len(X) - 1]
