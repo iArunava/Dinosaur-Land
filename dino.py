@@ -17,12 +17,9 @@ int2char = {i : ch for i, ch in enumerate(chars)}
 print ('Integer to Character Mapping: ')
 print (int2char)
 
-# Retrieve n_x, n_y from vocab_size
-n_x, n_y = vocab_size, vocab_size
-
 # Initialize parameters
-nurnn = 50 # Number of RNN units
-parameters = rnn.initialize_parameters(nurnn, vocab_size, dino_names)
+n_a = 50 # Number of RNN units
+parameters = rnn.initialize_parameters(n_a, vocab_size, vocab_size)
 seq_length = 7
 
 # Initialize Loss
@@ -31,7 +28,7 @@ loss = get_initial_loss(vocab_size, seq_length)
 # Build list of all dinosaurs
 with open('dataset/dinosaurs.txt', 'r') as f:
     dinos = f.readlines()
-dinos = [d.lower().strip() for dino in dinos]
+dinos = [dino.lower().strip() for dino in dinos]
 
 # Initialize the hidden state
 a_prev = np.zeros((n_a, 1))

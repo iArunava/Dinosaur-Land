@@ -1,8 +1,8 @@
-import numpy
+import numpy as np
 from utils import *
 
 class RNN:
-    def rnn_forward(self, X, Y, a0, parameters):
+    def rnn_forward(self, X, Y, a0, parameters, vocab_size=27):
         """
         Implements the complete forward propagation in RNN
         """
@@ -60,13 +60,10 @@ class RNN:
 
         return a_next, yt_pred, cache
 
-    def rnn_cell_backward(self, da_next, cache):
+    def rnn_cell_backward(self, gradients, parameters, x, a, a_prev):
         """
         Implements the backward pass for a single RNN cell
         """
-
-        # Retrieve the values from the cache
-        a_next, a_prev, xt, parameters = cache
 
         # Retrieve values from parameters
         Wax = parameters['Wax']
@@ -75,74 +72,56 @@ class RNN:
         ba = parameters['ba']
         by = parameters['by']
 
-        # Compute the gradient of tanh with respect to a_next
-        dtanh = (1 - a_next ** 2) * da_next
+        #Calculate gradients
+        gradients['dWya'] += np.dot(dy, a.T)
+        gradients['dby'] += dy
 
-        # Compute the gradient of the loss with respect to Wax
-        dxt = np.dot(Wax.T, dtanh)
-        dWax = np.dot(dtanh, xt.T)
+        da = np.dot(parameters['Wya'].T, dy) + gradients['da_next']
+        daraw = (1 - a * a) * da
 
-        # Compute the gradient with respect to Waa
-        da_prev = np.dot(Waa.T, dtanh)
-        dWaa = np.dot(dtanh, a_prev.T)
-
-        # Compute the gradients with respect to b
-        dba = np.sum(dtanh, axis=1, keepdims=True)
-
-        # Store the gradients
-        gradients = {'dxt' : dxt, 'da_prev' : da_prev,
-                     'dWax' : dWax, 'dWaa' : dWaa, 'dba' : dba}
+        gradients['db'] += daraw
+        gradients['dWax'] += np.dot(daraw, a_prev.T)
+        gradients['da_next'] = np.dot(parameters['Waa'].T, daraw)
 
         return gradients
 
-    def rnn_backward(self, da, caches):
+    def rnn_backward(self, X, Y, parameters, cache):
         """
         Implement the backward pass for a RNN over an entire sequence of input data
         """
 
-        # Retrieve values for the first cache to get dimension info
-        (caches, x) = caches
-        (a1, a0, x, parameters) = caches[0]
+        # Initialize the gradients
+        gradients = {}
 
-        # Retrieve dim info app from da and x1
-        n_a, m, T_x = da.shape
-        n_x, m = x1.shape
+        # Retrieve from cache
+        (y_hat, a, x) = cache
+
+        # Retrieve values from parameters
+        Wax = parameters['Wax']
+        Waa = parameters['Waa']
+        Wya = parameters['Wya']
+        ba = parameters['ba']
+        by = parameters['by']
 
         # Initialize the gradients with right sizes
-        dx = np.zeros((n_x, m, T_x))
-        dWax = np.zeros((n_a, n_x))
-        dWaa = np.zeros((n_a, n_a))
-        dba = np.zeros((n_a, 1))
-        da0 = np.zeros((n_a, m))
-        da_prevt = np.zeros((n_a, m))
+        dWax = np.zeros_like(Wax)
+        dWaa = np.zeros_like(Waa)
+        dWya = np.zeros_like(Wya)
+        dba = np.zeros_like(ba)
+        dby = np.zeros_like(by)
+        da_next = np.zeros_like(a[0])
 
         # Loop through the timesteps reversed
-        for t in reversed(range(T_x)):
+        for t in reversed(range(len(X))):
+            # Get a copy of the output in the current timestep
+            dy = np.copy(y_hat[t])
+
+            dy[Y[t]] -= 1
+
             # Compute the gradients at the time step t
-            gradients = self.rnn_cell_backward(da[:, :, t] + da_prevt, caches[t])
+            gradients = self.rnn_cell_backward(dy, gradients, parameters, x[t], a[t], a[t-1])
 
-            # Retrieve derivatives from gradients
-            dxt, = gradients['dxt']
-            da_prevt = gradients['da_prev']
-            dWaxt = gradients['dWax']
-            dWaat = gradients['dWaa']
-            dbat = gradients['dba']
-
-            # Store the gradient with respect to the input for this timestep
-            dx[:, :, t] = dxt
-
-            # Increment the global derivatives
-            dWax += dWaxt
-            dWaa += dWaat
-            dba += dbat
-
-        # Setting da0 to the gradient which has been propagated back through time
-        da0 = da_prevt
-
-        # Store the gradients in dictionary
-        gradients = {'dx': dx, 'da0': da0, 'dWax': dWax, 'dWaa': dWaa, 'dba': dba}
-
-        return gradients
+        return gradients, a
 
     def update_parameters(self, parameters, gradients, lr):
         parameters['Wax'] += -lr * gradients['dWax']
@@ -158,7 +137,7 @@ class RNN:
         """
 
         # Forward propagate
-        loss, cache, _, _ = self.rnn_forward(X, Y, a_prev, parameters)
+        loss, cache = self.rnn_forward(X, Y, a_prev, parameters)
 
         # Backpropagate through time
         gradients, a = self.rnn_backward(X, Y, parameters, cache)
@@ -171,7 +150,7 @@ class RNN:
 
         return loss, gradients, a[len(X) - 1]
 
-    def initialize_parameters(n_a, n_x, n_y):
+    def initialize_parameters(self, n_a, n_x, n_y):
         """
         Initialize parameters
         """
