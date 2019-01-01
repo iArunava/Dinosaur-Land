@@ -45,8 +45,8 @@ def sample(parameters, char2int):
     Waa = parameters['Waa']
     Wax = parameters['Wax']
     Wya = parameters['Wya']
-    Wba = parameters['Wba']
-    Wby = parameters['Wby']
+    ba = parameters['ba']
+    by = parameters['by']
 
     # Get vocab_size
     vocab_size = by.shape[0]
@@ -74,7 +74,7 @@ def sample(parameters, char2int):
     # Loop over timesteps and sample at each timestep
     while (idx != newline_char and counter != 50):
         # Forward Prop
-        a = np.tanh(np.dot(Wax, x) + np.dot(Waa, a_prev) + b)
+        a = np.tanh(np.dot(Wax, x) + np.dot(Waa, a_prev) + ba)
         z = np.dot(Wya, a) + by
         y = softmax(z)
 

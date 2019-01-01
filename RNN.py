@@ -27,18 +27,15 @@ class RNN:
             # Update the next hidden state
             # Get the prediction
             # And the cache for the forward pass
-            a[t], y_hat[t], cache = self.rnn_cell_forward(x[t], a[t-1], parameters)
+            a[t], y_hat[t] = self.rnn_cell_forward(x[t], a[t-1], parameters)
 
             # Get the loss
             loss -= np.log(y_hat[t][Y[t], 0])
 
-            # Save the value of new a_next
-            a[t] = a_next
-
         # Store values needed for backpropagation
         caches = (y_hat, a, x)
 
-        return loss, cache
+        return loss, caches
 
     def rnn_cell_forward(self, xt, a_prev, parameters):
         """
@@ -58,9 +55,9 @@ class RNN:
         # Compute the output of the current cell
         yt_pred = softmax(np.matmul(Wya, a_next) + by)
 
-        return a_next, yt_pred, cache
+        return a_next, yt_pred
 
-    def rnn_cell_backward(self, gradients, parameters, x, a, a_prev):
+    def rnn_cell_backward(self, dy, gradients, parameters, x, a, a_prev):
         """
         Implements the backward pass for a single RNN cell
         """
@@ -79,8 +76,9 @@ class RNN:
         da = np.dot(parameters['Wya'].T, dy) + gradients['da_next']
         daraw = (1 - a * a) * da
 
-        gradients['db'] += daraw
-        gradients['dWax'] += np.dot(daraw, a_prev.T)
+        gradients['dba'] += daraw
+        gradients['dWax'] += np.dot(daraw, x.T)
+        gradients['dWaa'] += np.dot(daraw, a_prev.T)
         gradients['da_next'] = np.dot(parameters['Waa'].T, daraw)
 
         return gradients
@@ -104,12 +102,12 @@ class RNN:
         by = parameters['by']
 
         # Initialize the gradients with right sizes
-        dWax = np.zeros_like(Wax)
-        dWaa = np.zeros_like(Waa)
-        dWya = np.zeros_like(Wya)
-        dba = np.zeros_like(ba)
-        dby = np.zeros_like(by)
-        da_next = np.zeros_like(a[0])
+        gradients['dWax'] = np.zeros_like(Wax)
+        gradients['dWaa'] = np.zeros_like(Waa)
+        gradients['dWya'] = np.zeros_like(Wya)
+        gradients['dba'] = np.zeros_like(ba)
+        gradients['dby'] = np.zeros_like(by)
+        gradients['da_next'] = np.zeros_like(a[0])
 
         # Loop through the timesteps reversed
         for t in reversed(range(len(X))):
@@ -128,7 +126,7 @@ class RNN:
         parameters['Waa'] += -lr * gradients['dWaa']
         parameters['Wya'] += -lr * gradients['dWya']
         parameters['ba'] += -lr * gradients['dba']
-        parameters['Wby'] += -lr * gradients['dby']
+        parameters['by'] += -lr * gradients['dby']
         return parameters
 
     def optimize(self, X, Y, a_prev, parameters, learning_rate=0.01):

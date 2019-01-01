@@ -44,14 +44,14 @@ for i in range(4):
     curr_loss, gradients, a_prev = rnn.optimize(X, Y, a_prev, parameters, 0.01)
 
     # Latency trick to keep the loss smooth
-    loss = smooth(loss, curr_loss)
+    loss = smooth_loss(loss, curr_loss)
 
     # Every n iterations generate samples
-    if j % 2000 == 0:
+    if i % 2000 == 0:
         print ('Iteration: %d, Loss: %f' % (i, loss) + '\n')
 
         # Sample dino names
-        for name in range(dino_names):
+        for name in range(data_size):
             sampled_indices = sample(parameters, char2int)
             print_sample(sampled_indices, int2char)
 
