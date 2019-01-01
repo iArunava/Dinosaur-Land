@@ -9,6 +9,11 @@ parser.add_argument('-e', '--epochs',
     default=10000,
     help='The number of epochs')
 
+parser.add_argument('-lr', '--learning-rate',
+    type=float,
+    default=0.01,
+    help='The number of epochs')
+
 FLAGS, unparsed = parser.parse_known_args()
 
 
@@ -27,7 +32,7 @@ print (int2char)
 
 # Initialize RNN
 n_a = 50 # Number of RNN units
-rnn = RNN(n_a, vocab_size, vocab_size, 0.01)
+rnn = RNN(n_a, vocab_size, vocab_size, FLAGS.learning_rate)
 
 # Sample Length
 sample_length = 7
@@ -70,3 +75,4 @@ for i in range(1, FLAGS.epochs):
         print ('\n')
 
 # Save the weights
+rnn.save_weights()
