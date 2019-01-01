@@ -139,3 +139,14 @@ class RNN:
         parameters = self.update_parameters(gradients)
 
         return loss, gradients, a[len(X) - 1]
+
+    def save_weights(self, atfname, at):
+        """
+        Help save the model
+        """
+        np.save('wax_' + atfname + '.npy', self.Wax)
+        np.save('waa_' + atfname + '.npy', self.Waa)
+        np.save('way_' + atfname + '.npy', self.Way)
+        np.save('ba_' + atfname + '.npy', self.ba)
+        np.save('by_' + atfname + '.npy', self.by)
+        print ('[INFO]Weights saved!')
