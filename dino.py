@@ -11,8 +11,6 @@ parser.add_argument('-e', '--epochs',
 
 FLAGS, unparsed = parser.parse_known_args()
 
-# Initialize RNN
-rnn = RNN()
 
 # Read the dataset
 data = open('./dataset/dinosaurs.txt', 'r').read()
@@ -27,13 +25,16 @@ int2char = {i : ch for i, ch in enumerate(chars)}
 print ('Integer to Character Mapping: ')
 print (int2char)
 
-# Initialize parameters
+# Initialize RNN
 n_a = 50 # Number of RNN units
-parameters = rnn.initialize_parameters(n_a, vocab_size, vocab_size)
-seq_length = 7
+rnn = RNN(n_a, vocab_size, vocab_size, 0.01)
+
+# Sample Length
+sample_length = 7
 
 # Initialize Loss
-loss = get_initial_loss(vocab_size, seq_length)
+loss = 0
+loss = get_initial_loss(vocab_size, sample_length)
 
 # Build list of all dinosaurs
 with open('dataset/dinosaurs.txt', 'r') as f:
@@ -51,7 +52,7 @@ for i in range(1, FLAGS.epochs):
     Y = X[1:] + [char2int['\n']]
 
     # Perform one optimization step
-    curr_loss, gradients, a_prev = rnn.optimize(X, Y, a_prev, parameters, 0.01)
+    curr_loss, gradients, a_prev = rnn.optimize(X, Y, a_prev)
 
     # Latency trick to keep the loss smooth
     loss = smooth_loss(loss, curr_loss)
@@ -61,8 +62,10 @@ for i in range(1, FLAGS.epochs):
         print ('Iteration: %d, Loss: %f' % (i, loss) + '\n')
 
         # Sample dino names
-        for name in range(seq_length):
+        for name in range(sample_length):
             sampled_indices = sample(parameters, char2int)
             print_sample(sampled_indices, int2char)
 
         print ('\n')
+
+# Save the weights
