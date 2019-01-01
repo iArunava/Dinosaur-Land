@@ -62,6 +62,7 @@ for i in range(1, FLAGS.epochs):
         print ('Iteration: %d, Loss: %f' % (i, loss) + '\n')
 
         # Sample dino names
+        parameters = rnn.get_weights()
         for name in range(sample_length):
             sampled_indices = sample(parameters, char2int)
             print_sample(sampled_indices, int2char)

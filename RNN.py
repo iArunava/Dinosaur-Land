@@ -51,7 +51,7 @@ class RNN:
 
         return loss, caches
 
-    def rnn_cell_forward(self, xt, a_prev, parameters):
+    def rnn_cell_forward(self, xt, a_prev):
         """
         Implements a single forward step in a RNN cell
         """
@@ -139,6 +139,13 @@ class RNN:
         parameters = self.update_parameters(gradients)
 
         return loss, gradients, a[len(X) - 1]
+
+    def get_weights(self):
+        return {'Wax' : self.Wax,
+                'Waa' : self.Waa,
+                'Wya' : self.Wya,
+                'ba' : self.ba,
+                'by' : self.by}
 
     def save_weights(self, atfname, at):
         """
