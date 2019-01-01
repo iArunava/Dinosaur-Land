@@ -1,7 +1,17 @@
 import numpy as np
 from utils import *
 from RNN import *
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-e', '--epochs',
+    type=int,
+    default=10000,
+    help='The number of epochs')
+
+FLAGS, unparsed = parser.parse_known_args()
+
+# Initialize RNN
 rnn = RNN()
 
 # Read the dataset
@@ -34,7 +44,7 @@ dinos = [dino.lower().strip() for dino in dinos]
 a_prev = np.zeros((n_a, 1))
 
 # Optimization Loop
-for i in range(4):
+for i in range(1, FLAGS.epochs):
     # Create a training example
     idx = i % len(dinos)
     X = [None] + [char2int[ch] for ch in dinos[idx]]
@@ -51,7 +61,7 @@ for i in range(4):
         print ('Iteration: %d, Loss: %f' % (i, loss) + '\n')
 
         # Sample dino names
-        for name in range(data_size):
+        for name in range(seq_length):
             sampled_indices = sample(parameters, char2int)
             print_sample(sampled_indices, int2char)
 
