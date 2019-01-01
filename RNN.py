@@ -2,48 +2,43 @@ import numpy
 from utils import *
 
 class RNN:
-    def rnn_forward(self, x, y, a0, parameters):
+    def rnn_forward(self, X, Y, a0, parameters):
         """
         Implements the complete forward propagation in RNN
         """
-        # Initialize caches which will contain all the caches required for backpropagation
-        caches = []
 
-        # Retrieve the dimensions from shapes of x and parameters['Wya']
-        n_x, m, T_x = x.shape
-        n_y, n_a = parameters['Wya']
+        # Initialize x, a and y_hat as empty dictionaries
+        x, a, y_hat = {}, {}, {}
 
-        # Initialize variables with zeros that will store the cell states and
-        # predictions for each cell
-        a = np.zeros((n_a, m, T_x))
-        y_pred = np.zeros((n_y, m, T_x))
+        # Copy the first cell state to the dictionary
+        a[-1] = np.copy(a0)
 
-        # Initialize the init a
-        a_next = a0
+        # Initialize your loss to 0
+        loss = 0
 
         # Loop over all the timesteps
-        for t in range(T_x):
+        for t in range(len(X)):
+
+            # Set x[t] to be a one hot vector representing the t'th character in X
+            x[t] = np.zeros((vocab_size, 1))
+            if (X[t] != None):
+                x[t][X[t]] = 1
+
             # Update the next hidden state
             # Get the prediction
             # And the cache for the forward pass
-            a_next, yt_pred, cache = self.rnn_cell_forward(x[:, :, t], a_next, parameters)
+            a[t], y_hat[t], cache = self.rnn_cell_forward(x[t], a[t-1], parameters)
 
             # Get the loss
-            loss -= np.log(yt_pred[y[t], 0])
+            loss -= np.log(y_hat[t][Y[t], 0])
 
             # Save the value of new a_next
-            a[:, :, t] = a_next
-
-            # Save the prediction
-            y_pred[:, :, t] = yt_pred
-
-            # Append to caches
-            caches.append(cache)
+            a[t] = a_next
 
         # Store values needed for backpropagation
-        caches = (caches, x)
+        caches = (y_hat, a, x)
 
-        return loss, caches, a, y_pred
+        return loss, cache
 
     def rnn_cell_forward(self, xt, a_prev, parameters):
         """
@@ -62,9 +57,6 @@ class RNN:
 
         # Compute the output of the current cell
         yt_pred = softmax(np.matmul(Wya, a_next) + by)
-
-        # Store values you need for backpropagation
-        cache = (a_next, a_prev, xt, parameters)
 
         return a_next, yt_pred, cache
 

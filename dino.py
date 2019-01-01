@@ -21,7 +21,8 @@ print (int2char)
 n_x, n_y = vocab_size, vocab_size
 
 # Initialize parameters
-parameters = initialize_parameters(vocab_size, dino_names)
+nurnn = 50 # Number of RNN units
+parameters = rnn.initialize_parameters(nurnn, vocab_size, dino_names)
 seq_length = 7
 
 # Initialize Loss
@@ -43,7 +44,7 @@ for i in range(4):
     Y = X[1:] + [char2int['\n']]
 
     # Perform one optimization step
-    curr_loss, gradients, a_prev = optimize(X, Y, a_prev, parameters, 0.01)
+    curr_loss, gradients, a_prev = rnn.optimize(X, Y, a_prev, parameters, 0.01)
 
     # Latency trick to keep the loss smooth
     loss = smooth(loss, curr_loss)
