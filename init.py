@@ -44,6 +44,11 @@ parser.add_argument('-md', '--model-dir',
     default='./model/',
     help='The directory where the model is stored.')
 
+parser.add_argument('-s', '--save-model',
+    type=int,
+    default=1,
+    help='Save the model. If 1 else 0. Default 1')
+
 FLAGS, unparsed = parser.parse_known_args()
 
 # Read the dataset
