@@ -152,11 +152,11 @@ class RNN:
         Help save the model
         """
         print ('[INFO]Saving the weights...')
-        np.save('wax_' + atfname + '.npy', self.Wax)
-        np.save('waa_' + atfname + '.npy', self.Waa)
-        np.save('wya_' + atfname + '.npy', self.Wya)
-        np.save('ba_' + atfname + '.npy', self.ba)
-        np.save('by_' + atfname + '.npy', self.by)
+        np.save(at + 'wax_' + atfname + '.npy', self.Wax)
+        np.save(at + 'waa_' + atfname + '.npy', self.Waa)
+        np.save(at + 'wya_' + atfname + '.npy', self.Wya)
+        np.save(at + 'ba_' + atfname + '.npy', self.ba)
+        np.save(at + 'by_' + atfname + '.npy', self.by)
         print ('[INFO]Weights saved!')
 
     def load_model(self, atfname, at=None):
