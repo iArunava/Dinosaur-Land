@@ -163,14 +163,18 @@ class RNN:
         """
         Load the weights
         """
+        # Fixing the path
+        if at[-1] != '/':
+            at += '/'
+
         print ('[INFO]Trying to Load the weights with extension "{}"'.format(atfname))
 
         try:
-            self.Wax = np.load('wax_' + atfname + '.npy')
-            self.Waa = np.load('waa_' + atfname + '.npy')
-            self.Wya = np.load('wya_' + atfname + '.npy')
-            self.ba = np.load('ba_' + atfname + '.npy')
-            self.by = np.load('by_' + atfname + '.npy')
+            self.Wax = np.load(at + 'wax_' + atfname + '.npy')
+            self.Waa = np.load(at + 'waa_' + atfname + '.npy')
+            self.Wya = np.load(at + 'wya_' + atfname + '.npy')
+            self.ba = np.load(at + 'ba_' + atfname + '.npy')
+            self.by = np.load(at + 'by_' + atfname + '.npy')
         except:
             raise Exception('[ERROR]Can"t find the saved weights')
 

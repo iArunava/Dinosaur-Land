@@ -51,7 +51,7 @@ def initiate_training(FLAGS, data_size, vocab_size, char2int, int2char):
             print ('\n')
 
     # Save the weights
-    rnn.save_weights(FLAGS.saved_model_extension)
+    rnn.save_weights(FLAGS.saved_model_extension, FLAGS.model_dir)
 
     print ('[INFO]Training Complete!!')
 
@@ -60,12 +60,12 @@ def get_new_dinos(FLAGS, data_size, vocab_size, char2int, int2char):
     rnn = RNN(FLAGS.rnn_hidden_units, vocab_size, vocab_size, FLAGS.learning_rate)
 
     # Load the weights
-    rnn.load_model(FLAGS.saved_model_extension)
+    rnn.load_model(FLAGS.saved_model_extension, FLAGS.model_dir)
 
     # Start sampling
     print ()
     for ii in range(FLAGS.sample_length):
         print_sample(sample(rnn.get_weights(), char2int), int2char)
     print ()
-    
+
     print ('[INFO]Sampling Complete!! \n How do you like the new dinosaur names?')

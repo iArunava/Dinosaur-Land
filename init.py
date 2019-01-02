@@ -39,6 +39,11 @@ parser.add_argument('-rhu', '--rnn-hidden-units',
     default=50,
     help='The number of hidden units in RNN')
 
+parser.add_argument('-md', '--model-dir',
+    type=str,
+    default='./model/',
+    help='The directory where the model is stored.')
+
 FLAGS, unparsed = parser.parse_known_args()
 
 # Read the dataset
