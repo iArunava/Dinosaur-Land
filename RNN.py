@@ -147,13 +147,30 @@ class RNN:
                 'ba' : self.ba,
                 'by' : self.by}
 
-    def save_weights(self, atfname, at):
+    def save_weights(self, atfname, at=None):
         """
         Help save the model
         """
+        print ('[INFO]Saving the weights...')
         np.save('wax_' + atfname + '.npy', self.Wax)
         np.save('waa_' + atfname + '.npy', self.Waa)
-        np.save('way_' + atfname + '.npy', self.Way)
+        np.save('wya_' + atfname + '.npy', self.Wya)
         np.save('ba_' + atfname + '.npy', self.ba)
         np.save('by_' + atfname + '.npy', self.by)
         print ('[INFO]Weights saved!')
+
+    def load_weights(self, atfname='1', at=None):
+        """
+        Load the weights
+        """
+        print ('[INFO]Trying to Load the weights with extension {}'.format(atfname))
+        try:
+            self.Wax = np.load('wax_' + atfname + '.npy')
+            self.Waa = np.load('waa_' + atfname + '.npy')
+            self.Wax = np.load('wya_' + atfname + '.npy')
+            self.Wax = np.load('ba_' + atfname + '.npy')
+            self.Wax = np.load('by_' + atfname + '.npy')
+        except:
+            raise Exception('[ERROR]Can"t find the saved weights!')
+
+        print ('[INFO]Weights Loaded successfully!')
